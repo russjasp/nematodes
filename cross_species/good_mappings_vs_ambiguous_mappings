@@ -6,7 +6,7 @@ cd /data/russ/nema/00_nematode/06_bam_files/good_map
 samtools view -b -q 30 NS.1258.001.IDT_i7_32---IDT_i5_32.24_17_Ben-1.realigned.bam -o good_map/NS.1258.001.IDT_i7_32---IDT_i5_32.24_17_Ben-1.realigned_unique_mq30.bam
 
 
-for bam in *.bam; do
+for bam in *realigned.bam; do
   
     base=$(basename "$bam" .bam)
 
