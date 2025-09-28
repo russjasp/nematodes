@@ -1,5 +1,5 @@
 
-for bam in *.bam; do
+for bam in *.realigned.bam; do
     base=$(basename "$bam" .bam)
     echo "Processing $bam..."
 
@@ -14,7 +14,7 @@ for bam in *.bam; do
            }
            if(mapq >= 30 && (xa==1 || sec>0)) print
          }' | \
-    samtools view -@ $THREADS -b -o "${base}_nonunique_mq30.bam" -
+    samtools view --threads 8 -b -o nonunique/"${base}_nonunique_mq30.bam" -
 
-    samtools index "${base}_nonunique_mq30.bam.bam"
+    samtools index nonunique/"${base}_nonunique_mq30.bam"
 done
