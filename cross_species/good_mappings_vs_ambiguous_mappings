@@ -11,14 +11,31 @@ for bam in *.bam; do
     base=$(basename "$bam" .bam)
 
     # good reads, ie, unique and MQ 30+
-    samtools view --threads 8 -b -q 30 "$bam" -o "${base}_unique_mq30.bam"
-    samtools index "${base}_unique_mq30.bam"
+    samtools view --threads 8 -b -q 30 "$bam" -o good_map/"${base}_unique_mq30.bam"
+    samtools index good_map/"${base}_unique_mq30.bam"
 
     # ambiguous reads
     samtools view -h "$bam" | \
         awk 'BEGIN{OFS="\t"} /^@/ {print; next} $5 < 30 {print}' | \
-        samtools view -b -o "${base}_ambig.bam" -
-    samtools index "${base}_ambig.bam"
+        samtools view -b -o ambig_map/"${base}_ambig.bam" -
+    samtools index ambig_map/"${base}_ambig.bam"
+
+
+
+ # MQ>=30 and non-unique (XA tag or secondary alignment)
+    samtools view --threads 4 -h "$bam" | \
+    awk 'BEGIN{OFS="\t"} 
+         /^@/ {print; next} 
+         {
+           mapq=$5; xa=0; sec=and($2,0x100)
+           for(i=12;i<=NF;i++){
+             if($i ~ /^XA:Z:/) xa=1
+           }
+           if(mapq >= 30 && (xa==1 || sec>0)) print
+         }' | \
+    samtools view --threads 4 -b -o nonunique/"${base}_nonunique_mq30.bam" -
+
+    samtools index nonunique/"${base}_nonunique_mq30.bam"
 
     echo "Processed $bam"
 done
